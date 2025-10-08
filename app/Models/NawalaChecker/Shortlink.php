@@ -2,6 +2,7 @@
 
 namespace App\Models\NawalaChecker;
 
+use App\Models\Traits\LogsActivity;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shortlink extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $table = 'nc_shortlinks';
 
