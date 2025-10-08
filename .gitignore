@@ -22,6 +22,7 @@ yarn-error.log
 /.vscode
 /.zed
 
-# Exclude all .md files except README.md
+# Exclude all .md files except important ones
 *.md
 !README.md
+!DEPLOYMENT_GUIDE.md
