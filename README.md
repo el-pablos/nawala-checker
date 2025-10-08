@@ -1,66 +1,176 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🔍 Nawala Checker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Nawala Checker** adalah aplikasi monitoring domain/URL 24/7 untuk mendeteksi pemblokiran (DNS/HTTP/HTTPS/SNI) oleh resolver/ISP termasuk Nawala, dengan kemampuan auto-rotation shortlink.
 
-## About Laravel
+Built with **Laravel 11**, **Inertia.js**, **React**, **TypeScript**, dan **Supabase PostgreSQL**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🎯 Core Features
+- **Multi-Resolver Checking** - DNS, DoH (DNS over HTTPS), DoT (DNS over TLS)
+- **Block Detection** - DNS filtering, HTTP block page, SNI blocking, RST detection
+- **Shortlink Auto-Rotation** - Automatic failover dengan priority-based selection
+- **Telegram Notifications** - Real-time alerts untuk status changes
+- **Groups & Tags** - Flexible organization dengan shared settings
+- **Dashboard & Statistics** - Real-time monitoring dan historical data
 
-## Learning Laravel
+### 🔒 Security
+- Input sanitization (XSS prevention)
+- Rate limiting pada critical endpoints
+- Permission-based access control
+- SQL injection prevention via Eloquent ORM
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### ⚡ Performance
+- Database indexing untuk fast queries
+- Caching strategy untuk frequently accessed data
+- Queue processing untuk background tasks
+- Optimized verdict fusion algorithm
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Quick Start
 
-## Laravel Sponsors
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js 18+ & NPM
+- Supabase Account (PostgreSQL database)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Installation
 
-### Premium Partners
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/el-pablos/nawala-checker.git
+   cd nawala-checker
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+2. **Install Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Contributing
+3. **Setup Environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   Edit `.env` dan update:
+   - Database credentials (Supabase)
+   - `TELEGRAM_BOT_TOKEN` (optional)
 
-## Code of Conduct
+4. **Setup Database**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   Run `initial.sql` di Supabase SQL Editor:
+   - Login ke [Supabase Dashboard](https://supabase.com/dashboard)
+   - Pilih project Anda
+   - Go to SQL Editor
+   - Copy-paste isi file `initial.sql`
+   - Run query
 
-## Security Vulnerabilities
+5. **Build Frontend**
+   ```bash
+   npm run build
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Start Application**
+   ```bash
+   php artisan serve
+   ```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📖 Usage
+
+### Creating Targets
+
+1. Navigate to `/nawala-checker/targets`
+2. Click "Add Target"
+3. Fill in domain/URL, group, tags, check interval
+4. Enable monitoring
+5. Click "Create Target"
+
+### Creating Shortlinks
+
+1. Navigate to `/nawala-checker/shortlinks`
+2. Click "Add Shortlink"
+3. Fill in slug, group, and multiple targets
+4. Set priority and weight for each target
+5. Click "Create Shortlink"
+
+---
+
+## 🔧 Console Commands
+
+```bash
+# Run checks for all enabled targets
+php artisan nawala:run-checks
+
+# Run check for specific target
+php artisan nawala:run-checks --target-id=123
+
+# Auto-rotate shortlinks
+php artisan nawala:auto-rotate
+```
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: Laravel 11, PHP 8.2+
+- **Frontend**: React 18, TypeScript, Inertia.js
+- **Database**: Supabase PostgreSQL
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite
+- **Testing**: PHPUnit
+
+---
+
+## 📝 Architecture
+
+### Service Layer Pattern
+- `NawalaCheckerService` - Main orchestration
+- `CheckRunnerService` - DNS/HTTP checking
+- `ShortlinkRotationService` - Auto-rotation logic
+- `TelegramNotifierService` - Notifications
+- `CacheService` - Caching strategy
+
+### Security Features
+- `SanitizesInput` trait - XSS prevention
+- `CheckPermission` middleware - Access control
+- `RateLimitMiddleware` - Rate limiting
+- Form Request validation
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow commit format:
+
+```
+<type>(<scope>): <subject>
+
+Types: feat, fix, docs, refactor, test, chore
+Scopes: nawala-checker, database, frontend, backend, tests
+```
+
+---
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](LICENSE).
+
+---
+
+## 👥 Author
+
+**el-pablos**
+- GitHub: [@el-pablos](https://github.com/el-pablos)
+- Email: yeteprem.end23juni@gmail.com
+
+---
+
+**Made with ❤️ for internet freedom monitoring**
