@@ -21,6 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+initial.sql
 
 # Exclude all .md files except important ones
 *.md
