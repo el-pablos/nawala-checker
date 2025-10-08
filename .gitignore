@@ -26,3 +26,4 @@ yarn-error.log
 *.md
 !README.md
 !DEPLOYMENT_GUIDE.md
+!IMPLEMENTATION_COMPLETE.md
