@@ -207,17 +207,17 @@ class StatusLogsTest extends TestCase
     {
         $checkResult = CheckResult::factory()->create([
             'target_id' => $this->target->id,
-            'status' => 'blocked',
+            'status' => 'DNS_FILTERED',
         ]);
 
         $this->target->update([
-            'last_status' => $checkResult->status,
+            'current_status' => $checkResult->status,
             'last_checked_at' => $checkResult->checked_at,
         ]);
 
         $this->assertDatabaseHas('nc_targets', [
             'id' => $this->target->id,
-            'last_status' => 'blocked',
+            'current_status' => 'DNS_FILTERED',
         ]);
     }
 
@@ -354,8 +354,8 @@ class StatusLogsTest extends TestCase
             ->get("/nawala-checker/targets/{$this->target->id}");
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => 
-            $page->has('check_results')
+        $response->assertInertia(fn ($page) =>
+            $page->has('checkResults')
         );
     }
 
@@ -364,12 +364,12 @@ class StatusLogsTest extends TestCase
     {
         $checkResult = CheckResult::factory()->create([
             'target_id' => $this->target->id,
-            'check_duration' => 1.25, // seconds
+            'response_time_ms' => 1250, // milliseconds (1.25 seconds)
         ]);
 
         $this->assertDatabaseHas('nc_check_results', [
             'id' => $checkResult->id,
-            'check_duration' => 1.25,
+            'response_time_ms' => 1250,
         ]);
     }
 }
