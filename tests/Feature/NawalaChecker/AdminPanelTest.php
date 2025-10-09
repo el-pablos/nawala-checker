@@ -63,7 +63,10 @@ class AdminPanelTest extends TestCase
             ->get('/admin/users');
 
         $response->assertOk();
-        $response->assertViewHas('users');
+        $response->assertInertia(fn ($page) => $page
+            ->component('Admin/Users/Index')
+            ->has('users')
+        );
     }
 
     /** @test */
@@ -287,15 +290,18 @@ class AdminPanelTest extends TestCase
     public function admin_can_view_system_statistics()
     {
         User::factory()->count(10)->create();
-        
+
         $group = Group::factory()->create();
-        Target::factory()->count(50)->create(['group_id' => $group->id]);
+        Target::factory()->count(50)->create(['group_id' => $group->id, 'owner_id' => $this->admin->id]);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/dashboard');
 
         $response->assertOk();
-        $response->assertViewHas('stats');
+        $response->assertInertia(fn ($page) => $page
+            ->component('Admin/Dashboard')
+            ->has('stats')
+        );
     }
 
     /** @test */
@@ -309,7 +315,7 @@ class AdminPanelTest extends TestCase
             'owner_id' => $user1->id,
             'group_id' => $group->id,
         ]);
-        
+
         Target::factory()->count(2)->create([
             'owner_id' => $user2->id,
             'group_id' => $group->id,
@@ -319,7 +325,10 @@ class AdminPanelTest extends TestCase
             ->get('/admin/targets');
 
         $response->assertOk();
-        $response->assertViewHas('targets');
+        $response->assertInertia(fn ($page) => $page
+            ->component('Admin/Targets')
+            ->has('targets')
+        );
     }
 
     /** @test */
@@ -331,7 +340,10 @@ class AdminPanelTest extends TestCase
             ->get("/admin/users/{$user->id}");
 
         $response->assertOk();
-        $response->assertViewHas('user');
+        $response->assertInertia(fn ($page) => $page
+            ->component('Admin/Users/Show')
+            ->has('user')
+        );
     }
 
     /** @test */

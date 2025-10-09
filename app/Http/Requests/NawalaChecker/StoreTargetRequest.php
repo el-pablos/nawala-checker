@@ -31,6 +31,16 @@ class StoreTargetRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $type = $this->input('type');
 
+                    // Check domain limit
+                    $user = auth()->user();
+                    if ($user && $user->domain_limit !== null) {
+                        $currentCount = \App\Models\NawalaChecker\Target::where('owner_id', $user->id)->count();
+                        if ($currentCount >= $user->domain_limit) {
+                            $fail('Anda telah mencapai batas maksimal domain (' . $user->domain_limit . ').');
+                            return;
+                        }
+                    }
+
                     // Block dangerous protocols
                     $dangerousProtocols = ['javascript:', 'data:', 'file:', 'ftp:'];
                     foreach ($dangerousProtocols as $protocol) {
