@@ -6,13 +6,13 @@ use App\Models\NawalaChecker\Group;
 use App\Models\NawalaChecker\Target;
 use App\Models\User;
 use App\Services\NawalaChecker\TelegramNotifierService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class TelegramNotificationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected User $user;
     protected Group $group;

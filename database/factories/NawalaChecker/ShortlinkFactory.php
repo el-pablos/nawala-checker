@@ -19,8 +19,8 @@ class ShortlinkFactory extends Factory
             'current_target_id' => null,
             'original_target_id' => null,
             'is_active' => fake()->boolean(90),
-            'last_rotated_at' => fake()->optional(0.3)->dateTimeBetween('-1 month', 'now'),
-            'rotation_count' => fake()->numberBetween(0, 10),
+            'last_rotated_at' => null, // Default to null for testing
+            'rotation_count' => 0, // Default to 0 for testing
             'created_by' => User::factory(),
             'metadata' => null,
         ];

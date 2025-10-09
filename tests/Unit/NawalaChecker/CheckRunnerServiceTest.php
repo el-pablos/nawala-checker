@@ -6,12 +6,13 @@ use App\Models\NawalaChecker\Target;
 use App\Models\NawalaChecker\Resolver;
 use App\Models\User;
 use App\Services\NawalaChecker\CheckRunnerService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CheckRunnerServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected CheckRunnerService $service;
     protected User $user;
@@ -26,6 +27,11 @@ class CheckRunnerServiceTest extends TestCase
     /** @test */
     public function it_can_check_target_status()
     {
+        // Mock HTTP requests to prevent actual network calls
+        Http::fake([
+            '*' => Http::response('OK', 200),
+        ]);
+
         $target = Target::factory()->create(['owner_id' => $this->user->id]);
         Resolver::factory()->create(['is_active' => true]);
 
@@ -112,6 +118,11 @@ class CheckRunnerServiceTest extends TestCase
     /** @test */
     public function it_updates_target_status_on_change()
     {
+        // Mock HTTP requests to prevent actual network calls
+        Http::fake([
+            '*' => Http::response('OK', 200),
+        ]);
+
         $target = Target::factory()->create([
             'owner_id' => $this->user->id,
             'current_status' => 'UNKNOWN',
@@ -164,6 +175,11 @@ class CheckRunnerServiceTest extends TestCase
     /** @test */
     public function it_stores_check_results_in_database()
     {
+        // Mock HTTP requests to prevent actual network calls
+        Http::fake([
+            '*' => Http::response('OK', 200),
+        ]);
+
         $target = Target::factory()->create(['owner_id' => $this->user->id]);
         $resolver = Resolver::factory()->create(['is_active' => true]);
 

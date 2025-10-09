@@ -7,12 +7,12 @@ use App\Models\NawalaChecker\Shortlink;
 use App\Models\NawalaChecker\ShortlinkGroup;
 use App\Models\NawalaChecker\Target;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class SecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected User $user;
     protected Group $group;

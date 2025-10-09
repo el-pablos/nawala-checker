@@ -17,8 +17,18 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_admin')->default(false);
+            $table->integer('domain_limit')->nullable(); // Limit number of domains per user
+            $table->timestamp('expires_at')->nullable(); // Account expiration date
+            $table->boolean('is_active')->default(true); // Enable/disable user account
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes(); // Add soft deletes support
+
+            $table->index('is_admin');
+            $table->index('domain_limit');
+            $table->index('expires_at');
+            $table->index('is_active');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

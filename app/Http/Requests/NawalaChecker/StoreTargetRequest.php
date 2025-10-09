@@ -32,7 +32,7 @@ class StoreTargetRequest extends FormRequest
                     // Validate as domain or URL
                     $isDomain = preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i', $value);
                     $isUrl = filter_var($value, FILTER_VALIDATE_URL);
-                    
+
                     if (!$isDomain && !$isUrl) {
                         $fail('Domain atau URL tidak valid.');
                     }
@@ -48,6 +48,7 @@ class StoreTargetRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:1000'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['integer', 'exists:nc_tags,id'],
+            'owner_id' => ['required', 'integer', 'exists:users,id'], // Added to allow owner_id in validated data
         ];
     }
 

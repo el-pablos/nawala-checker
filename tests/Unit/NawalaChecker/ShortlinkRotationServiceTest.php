@@ -7,12 +7,12 @@ use App\Models\NawalaChecker\ShortlinkGroup;
 use App\Models\NawalaChecker\ShortlinkTarget;
 use App\Models\User;
 use App\Services\NawalaChecker\ShortlinkRotationService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class ShortlinkRotationServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected ShortlinkRotationService $service;
     protected User $user;

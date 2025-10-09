@@ -6,12 +6,12 @@ use App\Models\NawalaChecker\Shortlink;
 use App\Models\NawalaChecker\ShortlinkGroup;
 use App\Models\NawalaChecker\ShortlinkTarget;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class ShortlinkFeatureTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected User $user;
     protected ShortlinkGroup $group;

@@ -224,12 +224,20 @@ class NawalaCheckerService
         ])->count();
         $okTargets = (clone $query)->where('current_status', 'OK')->count();
 
+        // Calculate percentages
+        $accessiblePercentage = $totalTargets > 0 ? round(($okTargets / $totalTargets) * 100) : 0;
+        $blockedPercentage = $totalTargets > 0 ? round(($blockedTargets / $totalTargets) * 100) : 0;
+
         return [
             'total_targets' => $totalTargets,
             'enabled_targets' => $enabledTargets,
             'blocked_targets' => $blockedTargets,
+            'blocked_count' => $blockedTargets, // Alias for tests
             'ok_targets' => $okTargets,
+            'accessible_count' => $okTargets, // Alias for tests
             'unknown_targets' => $totalTargets - $blockedTargets - $okTargets,
+            'accessible_percentage' => $accessiblePercentage,
+            'blocked_percentage' => $blockedPercentage,
         ];
     }
 }

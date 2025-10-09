@@ -5,12 +5,12 @@ namespace Tests\Feature\NawalaChecker;
 use App\Models\NawalaChecker\Target;
 use App\Models\NawalaChecker\Group;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class TargetFeatureTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected User $user;
 

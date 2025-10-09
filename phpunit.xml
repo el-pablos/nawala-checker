@@ -29,5 +29,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="TELEGRAM_BOT_TOKEN" value="8084871989:AAH0dbCrOgq028iFywu5F5qYx96b7zJGvWY"/>
+        <env name="TELEGRAM_CHAT_ID" value="5476148500"/>
     </php>
 </phpunit>

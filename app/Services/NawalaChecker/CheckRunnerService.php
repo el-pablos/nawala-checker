@@ -99,7 +99,7 @@ class CheckRunnerService
 
         return [
             'status' => $status,
-            'response_time_ms' => round($responseTime, 2),
+            'response_time_ms' => (int) round($responseTime),
             'resolved_ip' => $resolvedIp,
             'http_status_code' => $httpStatusCode,
             'error_message' => $errorMessage,
