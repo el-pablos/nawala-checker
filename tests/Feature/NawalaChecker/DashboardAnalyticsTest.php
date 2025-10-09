@@ -352,18 +352,21 @@ class DashboardAnalyticsTest extends TestCase
         $response = $this->actingAs($this->user)
             ->get('/nawala-checker');
 
-        $response->assertInertia(fn ($page) => 
+        $response->assertInertia(fn ($page) =>
             $page->where('stats.total_targets', 0)
         );
 
         // Add targets
-        Target::factory()->count(5)->create(['group_id' => $this->group->id]);
+        Target::factory()->count(5)->create([
+            'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
+        ]);
 
         // Check updated stats
         $response = $this->actingAs($this->user)
             ->get('/nawala-checker');
 
-        $response->assertInertia(fn ($page) => 
+        $response->assertInertia(fn ($page) =>
             $page->where('stats.total_targets', 5)
         );
     }
