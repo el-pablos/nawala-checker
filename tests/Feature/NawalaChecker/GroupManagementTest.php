@@ -84,6 +84,7 @@ class GroupManagementTest extends TestCase
         $group = Group::factory()->create();
         $targets = Target::factory()->count(3)->create([
             'group_id' => $group->id,
+            'owner_id' => $this->user->id,
         ]);
 
         $this->assertDatabaseCount('nc_targets', 3);
@@ -91,17 +92,27 @@ class GroupManagementTest extends TestCase
         // Delete group
         $group->delete();
 
-        // Verify targets are also deleted (cascade)
-        $this->assertDatabaseCount('nc_targets', 0);
+        // Verify targets still exist but group_id is set to null (nullOnDelete)
+        $this->assertDatabaseCount('nc_targets', 3);
+        foreach ($targets as $target) {
+            $this->assertDatabaseHas('nc_targets', [
+                'id' => $target->id,
+                'group_id' => null,
+            ]);
+        }
     }
 
     /** @test */
     public function it_has_default_color_if_not_specified()
     {
-        $group = Group::factory()->create(['color' => null]);
-        
-        // Should have a default color
-        $this->assertNotNull($group->color);
+        // Create group without specifying color
+        $group = Group::factory()->create();
+
+        // Refresh to get database default
+        $group->refresh();
+
+        // Should have the default color from database
+        $this->assertEquals('#3B82F6', $group->color);
     }
 
     /** @test */
@@ -110,16 +121,22 @@ class GroupManagementTest extends TestCase
         $group1 = Group::factory()->create(['name' => 'Group 1']);
         $group2 = Group::factory()->create(['name' => 'Group 2']);
 
-        Target::factory()->count(3)->create(['group_id' => $group1->id]);
-        Target::factory()->count(2)->create(['group_id' => $group2->id]);
+        Target::factory()->count(3)->create([
+            'group_id' => $group1->id,
+            'owner_id' => $this->user->id,
+        ]);
+        Target::factory()->count(2)->create([
+            'group_id' => $group2->id,
+            'owner_id' => $this->user->id,
+        ]);
 
         $response = $this->actingAs($this->user)
             ->get("/nawala-checker/targets?group_id={$group1->id}");
 
         $response->assertStatus(200);
-        
+
         // Should return only group1 targets
-        $response->assertInertia(fn ($page) => 
+        $response->assertInertia(fn ($page) =>
             $page->component('tools/nawala-checker/targets/index')
                 ->has('targets.data', 3)
         );
@@ -156,7 +173,10 @@ class GroupManagementTest extends TestCase
     public function it_can_count_targets_in_group()
     {
         $group = Group::factory()->create();
-        Target::factory()->count(5)->create(['group_id' => $group->id]);
+        Target::factory()->count(5)->create([
+            'group_id' => $group->id,
+            'owner_id' => $this->user->id,
+        ]);
 
         $group->refresh();
         $this->assertEquals(5, $group->targets()->count());
@@ -166,40 +186,49 @@ class GroupManagementTest extends TestCase
     public function it_can_get_group_statistics()
     {
         $group = Group::factory()->create();
-        
+
         // Create targets with different statuses
         Target::factory()->create([
             'group_id' => $group->id,
-            'last_status' => 'blocked',
+            'owner_id' => $this->user->id,
+            'current_status' => 'DNS_FILTERED',
         ]);
-        
+
         Target::factory()->create([
             'group_id' => $group->id,
-            'last_status' => 'accessible',
+            'owner_id' => $this->user->id,
+            'current_status' => 'OK',
         ]);
-        
+
         Target::factory()->create([
             'group_id' => $group->id,
-            'last_status' => 'accessible',
+            'owner_id' => $this->user->id,
+            'current_status' => 'OK',
         ]);
 
         $group->refresh();
-        
-        $blockedCount = $group->targets()->where('last_status', 'blocked')->count();
-        $accessibleCount = $group->targets()->where('last_status', 'accessible')->count();
+
+        $blockedCount = $group->targets()->where('current_status', 'DNS_FILTERED')->count();
+        $accessibleCount = $group->targets()->where('current_status', 'OK')->count();
 
         $this->assertEquals(1, $blockedCount);
         $this->assertEquals(2, $accessibleCount);
     }
 
     /** @test */
-    public function it_requires_unique_group_name()
+    public function it_requires_unique_group_slug()
     {
-        Group::factory()->create(['name' => 'Unique Group']);
+        Group::factory()->create([
+            'name' => 'Unique Group',
+            'slug' => 'unique-group',
+        ]);
 
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
-        Group::factory()->create(['name' => 'Unique Group']);
+
+        Group::factory()->create([
+            'name' => 'Another Name',
+            'slug' => 'unique-group', // Same slug should fail
+        ]);
     }
 
     /** @test */
@@ -221,6 +250,7 @@ class GroupManagementTest extends TestCase
         $group = Group::factory()->create();
         $targets = Target::factory()->count(3)->create([
             'group_id' => $group->id,
+            'owner_id' => $this->user->id,
             'enabled' => true,
         ]);
 
@@ -237,14 +267,16 @@ class GroupManagementTest extends TestCase
     public function it_can_get_active_targets_count()
     {
         $group = Group::factory()->create();
-        
+
         Target::factory()->count(3)->create([
             'group_id' => $group->id,
+            'owner_id' => $this->user->id,
             'enabled' => true,
         ]);
-        
+
         Target::factory()->count(2)->create([
             'group_id' => $group->id,
+            'owner_id' => $this->user->id,
             'enabled' => false,
         ]);
 
