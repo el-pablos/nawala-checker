@@ -94,7 +94,13 @@ class ShortlinksController extends BaseToolController
      */
     public function show(Shortlink $shortlink): Response
     {
-        $shortlink->load(['group', 'currentTarget', 'targets', 'rotationHistory']);
+        $shortlink->load([
+            'group',
+            'currentTarget',
+            'targets',
+            'rotationHistory.fromTarget',
+            'rotationHistory.toTarget',
+        ]);
 
         return Inertia::render('tools/nawala-checker/shortlinks/show', [
             'shortlink' => new ShortlinkResource($shortlink),

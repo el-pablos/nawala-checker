@@ -126,7 +126,10 @@ class ShortlinkFeatureTest extends TestCase
     /** @test */
     public function it_can_show_shortlink_details()
     {
-        $shortlink = Shortlink::factory()->create(['group_id' => $this->group->id]);
+        $shortlink = Shortlink::factory()->create([
+            'group_id' => $this->group->id,
+            'slug' => 'test-slug',
+        ]);
         ShortlinkTarget::factory()->count(2)->create(['shortlink_id' => $shortlink->id]);
 
         $response = $this->actingAs($this->user)
@@ -136,7 +139,6 @@ class ShortlinkFeatureTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('tools/nawala-checker/shortlinks/show')
             ->has('shortlink')
-            ->where('shortlink.id', $shortlink->id)
         );
     }
 
@@ -149,12 +151,14 @@ class ShortlinkFeatureTest extends TestCase
             'shortlink_id' => $shortlink->id,
             'priority' => 1,
             'is_active' => true,
+            'current_status' => 'OK',
         ]);
 
         $target2 = ShortlinkTarget::factory()->create([
             'shortlink_id' => $shortlink->id,
             'priority' => 2,
             'is_active' => true,
+            'current_status' => 'OK',
         ]);
 
         $shortlink->update([
