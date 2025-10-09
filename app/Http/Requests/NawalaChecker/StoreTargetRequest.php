@@ -29,12 +29,38 @@ class StoreTargetRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
-                    // Validate as domain or URL
-                    $isDomain = preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i', $value);
-                    $isUrl = filter_var($value, FILTER_VALIDATE_URL);
+                    $type = $this->input('type');
 
-                    if (!$isDomain && !$isUrl) {
-                        $fail('Domain atau URL tidak valid.');
+                    // Block dangerous protocols
+                    $dangerousProtocols = ['javascript:', 'data:', 'file:', 'ftp:'];
+                    foreach ($dangerousProtocols as $protocol) {
+                        if (stripos($value, $protocol) === 0) {
+                            $fail('Domain atau URL tidak valid.');
+                            return;
+                        }
+                    }
+
+                    // Validate based on type
+                    if ($type === 'domain') {
+                        // For domain type, only accept valid domain names (no protocol)
+                        $isDomain = preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i', $value);
+                        if (!$isDomain) {
+                            $fail('Format domain tidak valid.');
+                        }
+                    } elseif ($type === 'url') {
+                        // For URL type, only accept valid HTTP/HTTPS URLs
+                        $isUrl = filter_var($value, FILTER_VALIDATE_URL);
+                        $isHttpUrl = $isUrl && (stripos($value, 'http://') === 0 || stripos($value, 'https://') === 0);
+                        if (!$isHttpUrl) {
+                            $fail('Format URL tidak valid. Hanya HTTP/HTTPS yang diperbolehkan.');
+                        }
+                    } else {
+                        // Fallback: accept either domain or URL
+                        $isDomain = preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i', $value);
+                        $isUrl = filter_var($value, FILTER_VALIDATE_URL);
+                        if (!$isDomain && !$isUrl) {
+                            $fail('Domain atau URL tidak valid.');
+                        }
                     }
                 },
                 Rule::unique('nc_targets', 'domain_or_url')
