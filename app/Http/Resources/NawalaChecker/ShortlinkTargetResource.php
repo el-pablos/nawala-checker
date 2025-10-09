@@ -17,7 +17,7 @@ class ShortlinkTargetResource extends JsonResource
             'is_active' => $this->is_active,
             'current_status' => $this->current_status,
             'last_checked_at' => $this->last_checked_at?->toISOString(),
-            'created_at' => $this->created_at->toISOString(),
+            'created_at' => $this->created_at?->toISOString(),
         ];
     }
 }

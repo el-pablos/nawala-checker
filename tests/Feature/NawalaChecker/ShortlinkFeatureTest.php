@@ -144,26 +144,29 @@ class ShortlinkFeatureTest extends TestCase
     public function it_can_force_rotate_shortlink()
     {
         $shortlink = Shortlink::factory()->create(['group_id' => $this->group->id]);
-        
+
         $target1 = ShortlinkTarget::factory()->create([
             'shortlink_id' => $shortlink->id,
             'priority' => 1,
             'is_active' => true,
         ]);
-        
+
         $target2 = ShortlinkTarget::factory()->create([
             'shortlink_id' => $shortlink->id,
             'priority' => 2,
             'is_active' => true,
         ]);
 
-        $shortlink->update(['current_target_id' => $target1->id]);
+        $shortlink->update([
+            'current_target_id' => $target1->id,
+            'original_target_id' => $target1->id,
+        ]);
 
         $response = $this->actingAs($this->user)
             ->post("/nawala-checker/shortlinks/{$shortlink->id}/rotate");
 
         $response->assertRedirect();
-        
+
         $shortlink->refresh();
         $this->assertNotEquals($target1->id, $shortlink->current_target_id);
         $this->assertDatabaseHas('nc_rotation_history', [
