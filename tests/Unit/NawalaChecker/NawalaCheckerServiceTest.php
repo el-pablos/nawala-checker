@@ -223,8 +223,10 @@ class NawalaCheckerServiceTest extends TestCase
             'owner_id' => $this->user->id,
         ]);
 
+        // Create check results within the last 24 hours
         CheckResult::factory()->count(10)->create([
             'target_id' => $target->id,
+            'checked_at' => now()->subHours(rand(1, 23)),
         ]);
 
         $results = $this->service->getCheckResults($target, 24);

@@ -134,11 +134,16 @@ class NawalaCheckerService
 
         $statusCounts = $results->groupBy('status')->map->count();
         $avgResponseTime = $results->avg('response_time_ms');
-        $uptime = $results->where('status', 'OK')->count() / max($results->count(), 1) * 100;
+        $accessibleCount = $results->where('status', 'OK')->count();
+        $blockedStatuses = ['DNS_FILTERED', 'HTTP_BLOCKPAGE', 'HTTPS_SNI_BLOCK'];
+        $blockedCount = $results->whereIn('status', $blockedStatuses)->count();
+        $uptime = $accessibleCount / max($results->count(), 1) * 100;
 
         return [
             'total_checks' => $results->count(),
             'status_counts' => $statusCounts,
+            'accessible_count' => $accessibleCount,
+            'blocked_count' => $blockedCount,
             'avg_response_time' => round($avgResponseTime, 2),
             'uptime_percentage' => round($uptime, 2),
         ];
