@@ -80,7 +80,7 @@ class SettingsTest extends TestCase
                 'domain_or_url' => $target->domain_or_url,
                 'type' => $target->type,
                 'enabled' => $target->enabled,
-                'check_interval' => 4000, // More than 3600 seconds (1 hour)
+                'check_interval' => 90000, // More than 86400 seconds (24 hours)
             ]);
 
         $response->assertSessionHasErrors('check_interval');
@@ -340,7 +340,7 @@ class SettingsTest extends TestCase
     public function it_uses_group_interval_when_target_interval_is_null()
     {
         $group = Group::factory()->create([
-            'check_interval' => 600,
+            'default_check_interval' => 600,
         ]);
 
         $target = Target::factory()->create([
