@@ -24,8 +24,8 @@ class TargetResource extends JsonResource
             'last_checked_at' => $this->last_checked_at?->toISOString(),
             'last_status_change_at' => $this->last_status_change_at?->toISOString(),
             'notes' => $this->notes,
-            'created_at' => $this->created_at->toISOString(),
-            'updated_at' => $this->updated_at->toISOString(),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
             
             // Relationships
             'owner' => $this->whenLoaded('owner', fn() => [
