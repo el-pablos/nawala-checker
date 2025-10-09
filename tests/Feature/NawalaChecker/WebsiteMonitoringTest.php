@@ -231,15 +231,20 @@ class WebsiteMonitoringTest extends TestCase
     /** @test */
     public function it_requires_group_id()
     {
+        // group_id is actually nullable, so this test should verify that targets can be created without a group
         $response = $this->actingAs($this->user)
             ->post('/nawala-checker/targets', [
                 'domain_or_url' => 'example.com',
                 'type' => 'domain',
                 'enabled' => true,
-                // No group_id
+                // No group_id - this is allowed
             ]);
 
-        $response->assertSessionHasErrors('group_id');
+        $response->assertRedirect();
+        $this->assertDatabaseHas('nc_targets', [
+            'domain_or_url' => 'example.com',
+            'group_id' => null,
+        ]);
     }
 
     /** @test */

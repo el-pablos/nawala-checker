@@ -118,8 +118,8 @@ class Target extends Model
             return $this->check_interval;
         }
 
-        if ($this->group) {
-            return $this->group->check_interval;
+        if ($this->group && $this->group->default_check_interval) {
+            return $this->group->default_check_interval;
         }
 
         return 300; // default 5 minutes
