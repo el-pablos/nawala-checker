@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Disable CSRF verification in testing environment
-        if (app()->environment('testing')) {
+        if (env('APP_ENV') === 'testing') {
             $middleware->validateCsrfTokens(except: [
                 '*',
             ]);
