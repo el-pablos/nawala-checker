@@ -284,12 +284,14 @@ class NawalaCheckerServiceTest extends TestCase
             'shortlink_id' => $shortlink->id,
             'priority' => 1,
             'is_active' => true,
+            'current_status' => 'OK',
         ]);
-        
+
         $target2 = ShortlinkTarget::factory()->create([
             'shortlink_id' => $shortlink->id,
             'priority' => 2,
             'is_active' => true,
+            'current_status' => 'OK',
         ]);
 
         $shortlink->update(['current_target_id' => $target1->id]);
