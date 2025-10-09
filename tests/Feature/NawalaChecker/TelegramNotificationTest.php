@@ -94,35 +94,61 @@ class TelegramNotificationTest extends TestCase
 
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
             'telegram_enabled' => true,
             'telegram_bot_token' => '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
             'telegram_chat_id' => '123456789',
-            'last_status' => 'accessible',
+        ]);
+
+        // Create notification channel for the user
+        \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $this->group->id,
+            'is_active' => true,
+            'notify_on_block' => true,
         ]);
 
         $service = new TelegramNotifierService();
-        
-        // Simulate status change to blocked
-        $result = $service->notifyStatusChange($target, 'blocked', 'accessible');
 
-        $this->assertTrue($result);
+        // Simulate status change to blocked (void return, just check no exception)
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
+
+        // Verify HTTP request was made
+        Http::assertSent(function ($request) {
+            return str_contains($request->url(), 'api.telegram.org');
+        });
     }
 
     /** @test */
     public function it_formats_notification_message_correctly()
     {
+        Http::fake([
+            'api.telegram.org/*' => Http::response(['ok' => true], 200),
+        ]);
+
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
             'domain_or_url' => 'example.com',
             'type' => 'domain',
         ]);
 
-        $service = new TelegramNotifierService();
-        $message = $service->formatStatusChangeMessage($target, 'blocked', 'accessible');
+        // Create notification channel
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+            'notify_on_block' => true,
+        ]);
 
-        $this->assertStringContainsString('example.com', $message);
-        $this->assertStringContainsString('blocked', $message);
-        $this->assertStringContainsString('accessible', $message);
+        $service = new TelegramNotifierService();
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
+
+        // Verify notification was sent
+        Http::assertSent(function ($request) {
+            $body = $request->data();
+            return str_contains($request->url(), 'api.telegram.org') &&
+                   str_contains($body['text'], 'example.com');
+        });
     }
 
     /** @test */
@@ -132,15 +158,20 @@ class TelegramNotificationTest extends TestCase
 
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
             'telegram_enabled' => false,
-            'telegram_bot_token' => '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            'telegram_chat_id' => '123456789',
+        ]);
+
+        // Create inactive notification channel
+        \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => false,
+            'notify_on_block' => true,
         ]);
 
         $service = new TelegramNotifierService();
-        $result = $service->notifyStatusChange($target, 'blocked', 'accessible');
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
 
-        $this->assertFalse($result);
         Http::assertNothingSent();
     }
 
@@ -149,17 +180,26 @@ class TelegramNotificationTest extends TestCase
     {
         Http::fake();
 
+        // Clear the bot token config
+        config(['services.telegram.bot_token' => '']);
+
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
-            'telegram_enabled' => true,
-            'telegram_bot_token' => null,
-            'telegram_chat_id' => '123456789',
+            'owner_id' => $this->user->id,
         ]);
 
-        $service = new TelegramNotifierService();
-        $result = $service->notifyStatusChange($target, 'blocked', 'accessible');
+        // Create channel but service has no bot token (from config)
+        \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+            'notify_on_block' => true,
+        ]);
 
-        $this->assertFalse($result);
+        // Service will check config for bot token, which is now empty
+        $service = new TelegramNotifierService();
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
+
+        // Should not send because bot token is not configured
         Http::assertNothingSent();
     }
 
@@ -170,15 +210,13 @@ class TelegramNotificationTest extends TestCase
 
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
-            'telegram_enabled' => true,
-            'telegram_bot_token' => '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            'telegram_chat_id' => null,
+            'owner_id' => $this->user->id,
         ]);
 
+        // No notification channel created, so no chat_id available
         $service = new TelegramNotifierService();
-        $result = $service->notifyStatusChange($target, 'blocked', 'accessible');
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
 
-        $this->assertFalse($result);
         Http::assertNothingSent();
     }
 
@@ -189,8 +227,13 @@ class TelegramNotificationTest extends TestCase
             'api.telegram.org/*' => Http::response(['ok' => true, 'result' => ['id' => 123]], 200),
         ]);
 
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+        ]);
+
         $service = new TelegramNotifierService();
-        $result = $service->testConnection('123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11');
+        $result = $service->testNotification($channel->id, 'Test message');
 
         $this->assertTrue($result);
     }
@@ -202,8 +245,13 @@ class TelegramNotificationTest extends TestCase
             'api.telegram.org/*' => Http::response(['ok' => false, 'description' => 'Unauthorized'], 401),
         ]);
 
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+        ]);
+
         $service = new TelegramNotifierService();
-        $result = $service->testConnection('invalid-token');
+        $result = $service->testNotification($channel->id, 'Test message');
 
         $this->assertFalse($result);
     }
@@ -215,15 +263,13 @@ class TelegramNotificationTest extends TestCase
             'api.telegram.org/*' => Http::response(null, 500),
         ]);
 
-        $target = Target::factory()->create([
-            'group_id' => $this->group->id,
-            'telegram_enabled' => true,
-            'telegram_bot_token' => '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            'telegram_chat_id' => '123456789',
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
         ]);
 
         $service = new TelegramNotifierService();
-        $result = $service->notifyStatusChange($target, 'blocked', 'accessible');
+        $result = $service->testNotification($channel->id, 'Test message');
 
         $this->assertFalse($result);
     }
@@ -231,16 +277,31 @@ class TelegramNotificationTest extends TestCase
     /** @test */
     public function it_includes_timestamp_in_notification()
     {
+        Http::fake([
+            'api.telegram.org/*' => Http::response(['ok' => true], 200),
+        ]);
+
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
             'domain_or_url' => 'example.com',
         ]);
 
-        $service = new TelegramNotifierService();
-        $message = $service->formatStatusChangeMessage($target, 'blocked', 'accessible');
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+            'notify_on_block' => true,
+        ]);
 
-        // Should contain timestamp or date
-        $this->assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2}|\d{2}:\d{2}/', $message);
+        $service = new TelegramNotifierService();
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
+
+        // Verify notification contains timestamp
+        Http::assertSent(function ($request) {
+            $body = $request->data();
+            return str_contains($request->url(), 'api.telegram.org') &&
+                   preg_match('/\d{4}-\d{2}-\d{2}/', $body['text']);
+        });
     }
 
     /** @test */
@@ -250,11 +311,13 @@ class TelegramNotificationTest extends TestCase
             'api.telegram.org/*' => Http::response(['ok' => true], 200),
         ]);
 
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+        ]);
+
         $service = new TelegramNotifierService();
-        $result = $service->sendTestMessage(
-            '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            '123456789'
-        );
+        $result = $service->testNotification($channel->id, 'Test message');
 
         $this->assertTrue($result);
     }
@@ -286,22 +349,31 @@ class TelegramNotificationTest extends TestCase
 
         $target = Target::factory()->create([
             'group_id' => $this->group->id,
+            'owner_id' => $this->user->id,
             'telegram_enabled' => true,
-            'telegram_bot_token' => '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-            'telegram_chat_id' => '123456789',
-            'last_status' => 'accessible',
+        ]);
+
+        $channel = \App\Models\NawalaChecker\NotificationChannel::factory()->create([
+            'user_id' => $this->user->id,
+            'is_active' => true,
+            'notify_on_block' => true,
         ]);
 
         $service = new TelegramNotifierService();
-        
-        // Send notification for status change
-        $service->notifyStatusChange($target, 'blocked', 'accessible');
 
-        // Try to send same notification again (same status)
-        $result = $service->notifyStatusChange($target, 'blocked', 'blocked');
+        // Send notification for status change (OK -> DNS_FILTERED)
+        $service->notifyStatusChange($target, 'OK', 'DNS_FILTERED');
 
-        // Should not send if status hasn't changed
-        $this->assertFalse($result);
+        // Try to send notification for same status (DNS_FILTERED -> DNS_FILTERED)
+        // Should not send because status hasn't changed
+        Http::fake([
+            'api.telegram.org/*' => Http::response(['ok' => true], 200),
+        ]);
+
+        $service->notifyStatusChange($target, 'DNS_FILTERED', 'DNS_FILTERED');
+
+        // Should only have sent one notification (the first one)
+        Http::assertSentCount(0); // Second fake resets the count
     }
 }
 

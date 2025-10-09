@@ -30,6 +30,9 @@ class Target extends Model
         'consecutive_failures',
         'notes',
         'metadata',
+        'telegram_enabled',
+        'telegram_bot_token',
+        'telegram_chat_id',
     ];
 
     protected $casts = [
@@ -39,6 +42,7 @@ class Target extends Model
         'last_checked_at' => 'datetime',
         'last_status_change_at' => 'datetime',
         'metadata' => 'array',
+        'telegram_enabled' => 'boolean',
     ];
 
     /**

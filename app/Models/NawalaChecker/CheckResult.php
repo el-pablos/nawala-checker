@@ -24,6 +24,7 @@ class CheckResult extends Model
         'http_status_code',
         'error_message',
         'raw_response',
+        'resolver_results',
         'confidence',
         'checked_at',
     ];
@@ -33,6 +34,7 @@ class CheckResult extends Model
         'http_status_code' => 'integer',
         'confidence' => 'integer',
         'raw_response' => 'array',
+        'resolver_results' => 'array',
         'checked_at' => 'datetime',
     ];
 

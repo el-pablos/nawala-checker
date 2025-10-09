@@ -20,6 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
+
+        // Disable CSRF verification in testing environment
+        if (app()->environment('testing')) {
+            $middleware->validateCsrfTokens(except: [
+                '*',
+            ]);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

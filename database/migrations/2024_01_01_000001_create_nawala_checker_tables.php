@@ -125,9 +125,10 @@ return new class extends Migration
             $table->unsignedInteger('http_status_code')->nullable();
             $table->text('error_message')->nullable();
             $table->json('raw_response')->nullable();
+            $table->json('resolver_results')->nullable(); // Results from multiple resolvers
             $table->unsignedInteger('confidence')->default(100); // 0-100
             $table->timestamp('checked_at');
-            
+
             $table->index(['target_id', 'checked_at']);
             $table->index(['target_id', 'status']);
             $table->index('checked_at');

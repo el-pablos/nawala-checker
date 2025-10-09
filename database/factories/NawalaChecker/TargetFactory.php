@@ -13,19 +13,11 @@ class TargetFactory extends Factory
 
     public function definition(): array
     {
-        $domains = [
-            'reddit.com',
-            'vimeo.com',
-            'imgur.com',
-            'tumblr.com',
-            'netflix.com',
-            'example.com',
-            'test.com',
-        ];
-
         $type = fake()->randomElement(['domain', 'url']);
-        $domain = fake()->randomElement($domains);
-        
+
+        // Generate unique domain to avoid constraint violations
+        $domain = fake()->unique()->domainName();
+
         return [
             'domain_or_url' => $type === 'domain' ? $domain : 'https://' . $domain . '/' . fake()->slug(),
             'type' => $type,
