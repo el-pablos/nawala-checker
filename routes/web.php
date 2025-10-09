@@ -8,13 +8,21 @@ use App\Http\Controllers\Tools\NawalaChecker\ShortlinksController;
 use App\Http\Controllers\Admin\AdminController;
 
 Route::get('/', function () {
-    return view('welcome');
+    // Redirect authenticated users to dashboard, others to login
+    if (Auth::check()) {
+        return redirect('/nawala-checker');
+    }
+    return redirect('/login');
 });
 
-// Authentication Routes (for testing)
+// Authentication Routes
 Route::get('/login', function () {
+    // Redirect authenticated users to dashboard
+    if (Auth::check()) {
+        return redirect('/nawala-checker');
+    }
     return inertia('Auth/Login');
-})->name('login')->middleware('guest');
+})->name('login');
 
 Route::post('/login', function (\Illuminate\Http\Request $request) {
     $credentials = $request->validate([
