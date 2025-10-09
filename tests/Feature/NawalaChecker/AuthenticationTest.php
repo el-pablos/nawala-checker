@@ -278,7 +278,7 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)
             ->get('/login');
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/nawala-checker');
     }
 
     /** @test */
